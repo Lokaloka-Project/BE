@@ -166,3 +166,5 @@ D:\Project\doan\TravelAgencyAPI\obj\Debug\net9.0\ref\TravelAgencyAPI.dll
 D:\Project\doan\TravelAgencyAPI\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\Project\doan\TravelAgencyAPI\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\Project\doan\TravelAgencyAPI\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Project\doan\TravelAgencyAPI\obj\Debug\net9.0\TravelAgencyAPI.sourcelink.json
+D:\Project\doan\TravelAgencyAPI\bin\Debug\net9.0\BCrypt.Net-Next.dll

@@ -34,59 +34,22 @@ namespace TravelAgencyAPI.Controllers
                     l.CoordinateY,
                     l.OpeningTime,
                     l.ClosingTime,
-                    // 👇 Lấy hình đầu tiên từ bảng LocationDetails nếu có
                     Image = _db.LocationDetails
                         .Where(d => d.LocationId == l.Id)
                         .Select(d => d.Image)
-                        .FirstOrDefault()
+                        .FirstOrDefault(),
+
+                        Rating = _db.Ratings
+                .Where(r => r.LocationId == l.Id)
+                .Average(r => (double?)r.RatingValue) ?? 0, 
+
+                    TotalReviews = _db.Ratings
+                .Where(r => r.LocationId == l.Id)
+                .Count()
                 })
                 .ToListAsync();
 
             return Ok(locations);
-        }
-
-        // ✅ GET: /api/Locations?lang=en&keyword=beach&city=quang ngai
-        [HttpGet]
-        public async Task<IActionResult> GetLocationsByKey(
-            [FromQuery] string? keyword,
-            [FromQuery] string? city,
-            [FromQuery] string? type,
-            [FromQuery] string lang = "vi")
-        {
-            var query = _db.Locations
-                .Include(l => l.Translations)
-                .AsQueryable();
-
-            // Lọc cơ bản (chỉ tiếng Việt)
-            if (!string.IsNullOrEmpty(keyword))
-                query = query.Where(l => l.Name.Contains(keyword) || (l.Description ?? "").Contains(keyword));
-
-            if (!string.IsNullOrEmpty(city))
-                query = query.Where(l => l.City.Contains(city));
-
-            if (!string.IsNullOrEmpty(type))
-                query = query.Where(l => l.Type.Contains(type));
-
-            var list = await query
-                .Select(l => new
-                {
-                    l.Id,
-                    Name = lang == "en"
-                        ? (l.Translations.FirstOrDefault(t => t.Language == "en").Name ?? l.Name)
-                        : l.Name,
-                    City = lang == "en"
-                        ? (l.Translations.FirstOrDefault(t => t.Language == "en").City ?? l.City)
-                        : l.City,
-                    Description = lang == "en"
-                        ? (l.Translations.FirstOrDefault(t => t.Language == "en").Description ?? l.Description)
-                        : l.Description,
-                    Type = lang == "en"
-                        ? (l.Translations.FirstOrDefault(t => t.Language == "en").Type ?? l.Type)
-                        : l.Type
-                })
-                .ToListAsync();
-
-            return Ok(list);
         }
 
         // ✅ GET by ID

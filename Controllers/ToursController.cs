@@ -60,7 +60,72 @@ namespace TravelAgencyAPI.Controllers
                         LocationName = tl.Location.Name,
                         LocationLat = tl.Location.CoordinateX,
                         LocationLng = tl.Location.CoordinateY,
+                        Image = _db.LocationDetails
+            .Where(ld => ld.LocationId == tl.LocationId)
+            .Select(ld => ld.Image)
+            .FirstOrDefault()
+            ?? "https://via.placeholder.com/400x300?text=Thiếu+ảnh"
                     })
+                })
+                .ToListAsync();
+
+            return Ok(list);
+        }
+
+        // GET: api/tours/search?city=Quang%20Ngai
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchTours(
+            [FromQuery] string city,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            if (string.IsNullOrWhiteSpace(city))
+                return BadRequest(new { message = "City is required" });
+
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var q = _db.Tours
+                .AsNoTracking()
+                .Where(t => t.Address.ToLower().Contains(city.ToLower()));
+
+            var list = await q
+                .OrderByDescending(t => t.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Title,
+                    t.Description,
+                    t.Duration,
+                    t.Price,
+                    t.Address,
+                    t.CreatedAt,
+                    t.Image,
+
+                    // ⭐ GIỐNG GetAll
+                    Locations = t.TourLocations
+                        .OrderBy(tl => tl.DayNumber)
+                        .ThenBy(tl => tl.OrderInDay)
+                        .Select(tl => new
+                        {
+                            tl.Id,
+                            tl.LocationId,
+                            tl.DayNumber,
+                            tl.OrderInDay,
+                            tl.Note,
+
+                            LocationName = tl.Location.Name,
+                            LocationLat = tl.Location.CoordinateX,
+                            LocationLng = tl.Location.CoordinateY,
+
+                            Image = _db.LocationDetails
+                                .Where(ld => ld.LocationId == tl.LocationId)
+                                .Select(ld => ld.Image)
+                                .FirstOrDefault()
+                                ?? "https://via.placeholder.com/400x300?text=Thiếu+ảnh"
+                        })
                 })
                 .ToListAsync();
 
@@ -96,6 +161,7 @@ namespace TravelAgencyAPI.Controllers
                             LocationName = tl.Location.Name,
                             LocationLat = tl.Location.CoordinateX,
                             LocationLng = tl.Location.CoordinateY,
+                            LocationDescription = tl.Location.Description,
 
                             // 🖼️ Lấy ảnh từ bảng LocationDetails
                             Image = _db.LocationDetails
